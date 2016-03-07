@@ -1,4 +1,7 @@
 package org.fxapps;
+
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javafx.collections.FXCollections;
@@ -55,8 +58,8 @@ public class ComboBoxAutoComplete<T> {
 			cmb.getTooltip().hide();
 		} else {
 			Stream<T> itens = cmb.getItems().stream();
-			String txtUsr = filter.toString().toLowerCase();
-			itens.filter(el -> el.toString().toLowerCase().contains(txtUsr)).forEach(filteredList::add);
+			String txtUsr = unaccent(filter.toString().toLowerCase());
+			itens.filter(el -> unaccent(el.toString().toLowerCase()).contains(txtUsr)).forEach(filteredList::add);
 			cmb.getTooltip().setText(txtUsr);
 			Window stage = cmb.getScene().getWindow();
 			double posX = stage.getX() + cmb.getBoundsInParent().getMinX();
@@ -73,6 +76,12 @@ public class ComboBoxAutoComplete<T> {
 		T s = cmb.getSelectionModel().getSelectedItem();
 		cmb.getItems().setAll(originalItems);
 		cmb.getSelectionModel().select(s);
+	}
+
+	private String unaccent(String s) {
+		String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
+		Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+		return pattern.matcher(temp).replaceAll("");
 	}
 
 }
